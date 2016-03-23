@@ -18,7 +18,7 @@
 
 # Utilise (des 2016-2017) en M1 informatique parcours optimisation en recherche operationnelle :
 #
-#  cours Metaheuristics
+#  course Metaheuristics
 
 # Avertissement :
 #
