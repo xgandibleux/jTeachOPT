@@ -1,7 +1,8 @@
 # jTeachOPT
 Implementation in Julia of well-known optimization algorithms for pedagogical purposes
 
-Currently : Heuristics, metaheuristics applied on the 01UKP implemented in Julia
+Currently : 
+- Heuristics and metaheuristics applied on the 0/1 unidimensional knapsack problem (01UKP) 
 
 Algorithms/procedures implemented :
 -  Generator of instances for the 01UKP
