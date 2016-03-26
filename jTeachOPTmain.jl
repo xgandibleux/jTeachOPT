@@ -105,7 +105,7 @@ end
 
 function swap(s)
   i0::Int64=-1;  i1::Int64=-1   #astuces
-  i01::Int64=-1; i10::Int64=-1
+  i01::Int64=-1; i10::Int64=-1  #astuces
 
   sVoisin = deepcopy(s)
 
