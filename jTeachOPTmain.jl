@@ -279,8 +279,8 @@ end
 
 function traceSolutionsSA()
 title("01UKP | n=" * dec(ukp.n)) # * " | α=" * dec(α) * " | lPalier=" * lPalier )
-  xlabel("itérations de l'algorithme")
-  ylabel("valeurs de f(x)")
+  xlabel("Algorithm's Iterations")
+  ylabel("Function Value")
   grid()
   #xlim(0, length(zBest))
   #ylim(0, length(zAll))
@@ -301,9 +301,9 @@ end
 # Trace la courbe de refroidissement du SA
 
 function traceTemperatureSA()
-  title("Schéma de refroidissement")
-  xlabel("itérations")
-  ylabel("température")
+  title("Cooling Schedule")
+  xlabel("iterations")
+  ylabel("temperature")
   plot(vtemp)
 end
 
@@ -331,9 +331,9 @@ function examenRefroidissement(t0=100 , α=0.7,  lgPalier=6 , tLow = 1)
 
   ax = [ i for i=1:length(ay) ] # [1:1:length(ay)]
 
-  title("Schéma de refroidissement")
-  xlabel("itérations")
-  ylabel("température")
+  title("Cooling Schedule")
+  xlabel("iterations")
+  ylabel("temperature")
   b = bar(ax,ay,color="#0f87bf",align="center", width=1.0, edgecolor ="lightgrey")
 
   # sortie ecran du tableau de valeurs
