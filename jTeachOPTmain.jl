@@ -42,28 +42,41 @@
 # ------------------------------------------------------------
 # constantes globales (besoin au bavardage de l'algo)
 
-verbose = false
+const verbose = false
+
+# ------------------------------------------------------------
+# Global vectors storing the solutions for graphical purposes
+
+global zBest   = [] # meilleures obtenues
+global zAll    = [] # toutes
+global zMaxAll = [] # max de toutes
+global vtemp   = [] # courbe refroidissement
 
 # ------------------------------------------------------------
 # structure d'une instance de 01UKP (sac a dos unidimmensionel en variables 01)
 
 type instance
-  n  # taille de l'instance
-  c  # couts des items
-  w  # poids des items
-  W  # rhs
+  n ::Int16      # taille de l'instance ([0,65535])
+  c               # couts des items
+  w               # poids des items
+  W ::Int16      # rhs ([0,65535])
 end
 
 # ------------------------------------------------------------
 # structure d'une solution mono-objectif
 
 type solution
-  x  # variable
-  v0 # indices des els de la variable a 0
-  v1 # indices des els de la variable a 1
-  z  # performance
-  r  # capacite residuelle # propre au 01UKP
-  somX # somme des x_i = 1
+
+  # pour tous problemes en variables binaires de 1..n
+  x               # variables
+  v0              # indices des els de la variable a 0
+  v1              # indices des els de la variable a 1
+  z    ::Int16   # performance ([0,65535])
+
+  # pour le UKP
+  r    ::Int16   # capacite residuelle de la contrainte ([0,65535])
+  somX ::Int16   # somme des x_i = 1 ([0,65535])
+
 end
 
 # ------------------------------------------------------------
@@ -431,14 +444,6 @@ end
 # ============================================================
 # POINT d'ENTREE PRINCIPAL
 # ============================================================
-
-# ------------------------------------------------------------
-# Global vectors storing the solutions for graphical purposes
-
-zBest   = [] # meilleures obtenues
-zAll    = [] # toutes
-zMaxAll = [] # max de toutes
-vtemp   = [] # courbe refroidissement
 
 # ------------------------------------------------------------
 # Generate an instance for the 01UKP (n, max_ci, max_wi)
