@@ -55,10 +55,10 @@ global vtemp   = [] # courbe refroidissement
 # structure d'une instance de 01UKP (sac a dos unidimmensionel en variables 01)
 
 type instance
-  n ::Int64      # taille de l'instance ([0,65535])
+  n ::Int64      # taille de l'instance
   c              # couts des items
   w              # poids des items
-  W ::Int64      # rhs ([0,65535])
+  W ::Int64      # rhs
 end
 
 # ------------------------------------------------------------
@@ -70,11 +70,11 @@ type solution
   x              # variables
   v0             # indices des els de la variable a 0
   v1             # indices des els de la variable a 1
-  z    ::Int64   # performance ([0,65535])
+  z    ::Int64   # performance
 
   # pour le UKP
-  r    ::Int64   # capacite residuelle de la contrainte ([0,65535])
-  somX ::Int64   # somme des x_i = 1 ([0,65535])
+  r    ::Int64   # capacite residuelle de la contrainte
+  somX ::Int64   # somme des x_i = 1
 
 end
 
