@@ -6,8 +6,7 @@
 #  Xavier Gandibleux (Xavier.Gandibleux@univ-nantes.fr)
 #  Universite de Nantes, Faculty of sciences and technologies - IRCCyN UMR CNRS 6597
 #
-#  Ver 0.1.3 - Released : 23 Mars 2016
-
+#  Ver 0.1.4 - Released : 27 Mars 2016
 # Objectif de ce package (English version will follow soon):
 #
 #  Ensemble de primitives julia a vocation pedagogique en support a l'enseignement
@@ -56,10 +55,10 @@ global vtemp   = [] # courbe refroidissement
 # structure d'une instance de 01UKP (sac a dos unidimmensionel en variables 01)
 
 type instance
-  n ::Int16      # taille de l'instance ([0,65535])
-  c               # couts des items
-  w               # poids des items
-  W ::Int16      # rhs ([0,65535])
+  n ::Int64      # taille de l'instance ([0,65535])
+  c              # couts des items
+  w              # poids des items
+  W ::Int64      # rhs ([0,65535])
 end
 
 # ------------------------------------------------------------
@@ -68,14 +67,14 @@ end
 type solution
 
   # pour tous problemes en variables binaires de 1..n
-  x               # variables
-  v0              # indices des els de la variable a 0
-  v1              # indices des els de la variable a 1
-  z    ::Int16   # performance ([0,65535])
+  x              # variables
+  v0             # indices des els de la variable a 0
+  v1             # indices des els de la variable a 1
+  z    ::Int64   # performance ([0,65535])
 
   # pour le UKP
-  r    ::Int16   # capacite residuelle de la contrainte ([0,65535])
-  somX ::Int16   # somme des x_i = 1 ([0,65535])
+  r    ::Int64   # capacite residuelle de la contrainte ([0,65535])
+  somX ::Int64   # somme des x_i = 1 ([0,65535])
 
 end
 
@@ -89,7 +88,7 @@ end
 # ------------------------------------------------------------
 # split de la solution en 2 vecteurs d'indices de variables a 0 et a 1
 
-function splitX(s)
+function splitX(s::solution)
   s.v0 = [] ; s.v1 = []
   for i=1:length(ukp.c)
     if s.x[i] == 0
@@ -103,7 +102,7 @@ end
 # ------------------------------------------------------------
 # construit un voisin aleatoire realisable par swap (echange aleatoire)
 
-function swap(s)
+function swap(s::solution)
   i0::Int64=-1;  i1::Int64=-1   #astuces
   i01::Int64=-1; i10::Int64=-1  #astuces
 
@@ -137,7 +136,7 @@ end
 # ------------------------------------------------------------
 # construit un voisin aleatoire realisable par add_ou_drop (flip 01 ou 10 aleatoire)
 
-function addOrDrop(s)
+function addOrDrop(s::solution)
   i0::Int64=-1;  i1::Int64=-1   #astuces
   i01::Int64=-1; i10::Int64=-1
 
@@ -177,7 +176,7 @@ end
 #          heuExplore(s0, zBest)
 #          @printf "\n\nzBest=%s \n" zBest
 
-function heuExplore(s, zBest)
+function heuExplore(s::solution, zBest)
   push!(zBest,s.z)
 
   essais = 10 # nombre de voisins construits
@@ -200,9 +199,9 @@ end
 # ------------------------------------------------------------
 # metaheuristique "Recuit simule" pour une fonction a maximiser
 
-function metaSA(s0, t0, lPalier, α, move, tLow, verbose)
+function metaSA(s0::solution, t0::Float64, lPalier::Int64, α::Float64, move, tLow::Float64, nogoodMax::Int64, verbose)
 
-  verboseDecision = false # rapporte (ou pas) les 4 decisions de l'algo (A++,A+,A-,R)
+  const verboseDecision = false # rapporte (ou pas) les 4 decisions de l'algo (A++,A+,A-,R)
 
   if (verbose == true)
     @printf "t0= %d, lPalier= %d, α= %f \n" t0 lPalier α
@@ -217,6 +216,7 @@ function metaSA(s0, t0, lPalier, α, move, tLow, verbose)
   push!(vtemp,t0)
 
   t = t0
+  nogood = 0
 
   iter=1
   while true
@@ -241,6 +241,8 @@ function metaSA(s0, t0, lPalier, α, move, tLow, verbose)
       if ((Δz >= 0) || (exp(-(sCur.z - sVois.z)/t)>prob))
 
         sCur = deepcopy(sVois)
+        nogood = 0
+
         if (sVois.z > sBest.z)
           sBest = deepcopy(sVois)
           @printf "A++ => zBest=%d\n" sBest.z
@@ -258,6 +260,7 @@ function metaSA(s0, t0, lPalier, α, move, tLow, verbose)
           end
         end
       else
+        nogood +=1
         if (verboseDecision == true)
           @printf "R  \n"
         end
@@ -269,8 +272,10 @@ function metaSA(s0, t0, lPalier, α, move, tLow, verbose)
 
     t = t * α
 
-    (t<tLow) && break # repeat...until
+    ((t<tLow) || (nogood >= nogoodMax)) && break # repeat...until
   end
+  if (t<tLow) @printf("stopping SA because : t<tLow\n") end
+  if (nogood >= nogoodMax) @printf("stopping SA because : nogood >= nogoodMax\n") end
   return sBest
 end
 
@@ -312,7 +317,7 @@ end
 # appel :
 #         examenRefroidissement(t0=100 , α=0.7,  lgPalier=6 , tLow = 1)
 
-function examenRefroidissement(t0=100 , α=0.7,  lgPalier=6 , tLow = 1)
+function examenRefroidissement(t0=100.0 , α=0.7,  lgPalier=6 , tLow = 1.0)
   # t0=100; alpha=0.9; lgPalier = 5 ; tLow = 1
 
   @printf "t0 = %d, lgPalier = %d, α=%f \n" t0 lgPalier α
@@ -339,7 +344,7 @@ function examenRefroidissement(t0=100 , α=0.7,  lgPalier=6 , tLow = 1)
   # sortie ecran du tableau de valeurs
   @printf "   i   k      t \n"
   for i = 1:length(ay)
-    @printf "%4d %3d %6.2f \n" i ceil(Int8,i/lgPalier) ay[i]
+    @printf "%4d %3d %6.2f \n" i ceil(Int64,i/lgPalier) ay[i]
   end
 end
 
@@ -388,6 +393,10 @@ function computeGreedySolutionUKP(ukp)
     sGreedy.z = fctUKP(ukp.c, sGreedy.x)
     sGreedy.r = ukp.W - dot(ukp.w, sGreedy.x)
     sGreedy.somX=sum(sGreedy.x) # somme des x_i = 1
+
+    # ---
+    # scinde le vecteur de x binaire en 2 vecteurs d'indices
+    splitX(sGreedy)
                         
     return sGreedy
 end
@@ -471,18 +480,29 @@ if (verbose == true)
 end
 
 # ------------------------------------------------------------
-# Search a good solution with the simulated annealing
+# Numerical experiment => perform nbrRuns
 
-# move 1: pour flirter avec le glouton a sommeX variable
-t0 = 300 ; lPalier = ceil(Int64, 1.5 * ukp.n) ; α = 0.95 ; tLow =0.5
-@printf "t0 = %d, lPalier = %d, α=%f \n" t0 lPalier α
-sBest=metaSA(s0, t0, lPalier, α, addOrDrop, tLow, verbose)
+nbrRuns = 1
+sBest = solution(zeros(Int64, ukp.n), [], [], 0, 0, 0)
+allzBest = []
 
-# move 2: pour creuser autour du glouton a sommeX fixe
-t0 = 50 ; lPalier = ceil(Int64, 2.5 * ukp.n) ; α = 0.8 ; tLow =0.05
-@printf "t0 = %d, lPalier = %d, α=%f \n" t0 lPalier α
-sBest=metaSA(sBest, t0, lPalier, α, swap, tLow, verbose)
+for run = 1:nbrRuns
+  # ----------------------------------------------------------
+  # Search a good solution with the simulated annealing
 
+  # move 1: pour flirter avec le glouton a sommeX variable
+  t0 = 300.0 ; lPalier = ceil(Int64, 1.5 * ukp.n) ; α = 0.95 ; tLow =0.5 ; nogoodMax = 5 * ukp.n
+  @printf "t0 = %d, lPalier = %d, α=%f \n" t0 lPalier α
+  sBest=metaSA(s0, t0, lPalier, α, addOrDrop, tLow, nogoodMax, verbose)
+
+  # move 2: pour creuser autour du glouton a sommeX fixe
+  t0 = 50.0 ; lPalier = ceil(Int64, 2.5 * ukp.n) ; α = 0.8 ; tLow =0.05 ; nogoodMax = 10 * ukp.n
+  @printf "t0 = %d, lPalier = %d, α=%f \n" t0 lPalier α
+  sBest=metaSA(sBest, t0, lPalier, α, swap, tLow, nogoodMax, verbose)
+
+  push!(allzBest,sBest.z)
+
+end #nbrRuns
 
 # ------------------------------------------------------------
 # Plotting the results
