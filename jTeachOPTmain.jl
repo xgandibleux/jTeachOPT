@@ -34,59 +34,59 @@
 #  Simulated Annealing metaheuristic (metaSA)
 #  swap move for the 01UKP (swap)
 #  add_or_drop move for the 01UKP (addOrDrop)
-#  Computing and plotting of a cooling schedule (examenRefroidissement)
+#  Computing and plotting of a cooling schedule (coolingIllustration)
 
 # ============================================================
 
 # ------------------------------------------------------------
-# constantes globales (besoin au bavardage de l'algo)
+# Global constants for reporting or not the activity of algorithms
 
 const verbose = false
 
 # ------------------------------------------------------------
 # Global vectors storing the solutions for graphical purposes
 
-global zBest   = [] # meilleures obtenues
-global zAll    = [] # toutes
-global zMaxAll = [] # max de toutes
-global vtemp   = [] # courbe refroidissement
+global zBest    = [] # each best values of f(x) collected 
+global zBestAll = [] # best values of f(x) collected for each iteration
+global zAll     = [] # all values of f(x) collected for each iteration
+global tAll     = [] # values of the cooling schedule for each iteration
 
 # ------------------------------------------------------------
-# structure d'une instance de 01UKP (sac a dos unidimmensionel en variables 01)
+# Datastructure of a 01UKP instance (single objective unidimensional binary knapsack problem)
 
 type instance
-  n ::Int64      # taille de l'instance
-  c              # couts des items
-  w              # poids des items
+  n ::Int64      # instance size
+  c              # cost of items
+  w              # weight of items
   W ::Int64      # rhs
 end
 
 # ------------------------------------------------------------
-# structure d'une solution mono-objectif
+# Datastructure of a 01UKP solution 
 
 type solution
 
-  # pour tous problemes en variables binaires de 1..n
+  # for all problems defined by one vector of binary variables  1..n
   x              # variables
-  v0             # indices des els de la variable a 0
-  v1             # indices des els de la variable a 1
+  v0             # index of els of the variable equal to 0
+  v1             # index of els of the variable equal to 1
   z    ::Int64   # performance
 
-  # pour le UKP
-  r    ::Int64   # capacite residuelle de la contrainte
-  somX ::Int64   # somme des x_i = 1
+  # for the UKP
+  r    ::Int64   # residual capacity of the constraint
+  somX ::Int64   # sum of x_i = 1
 
 end
 
 # ------------------------------------------------------------
-# evalue la fonction objectif en une solution realisable
+# evaluate the objective function for a given solution
 
 function fctUKP(c,x)
   return dot(c,x) # sum_{i=1}^{n} c_i x_i
 end
 
 # ------------------------------------------------------------
-# split de la solution en 2 vecteurs d'indices de variables a 0 et a 1
+# split of a solution into 2 index vectors V0 and V1 according respectively if x_i=0 or x_i=1
 
 function splitX(s::solution)
   s.v0 = [] ; s.v1 = []
@@ -100,7 +100,8 @@ function splitX(s::solution)
 end
 
 # ------------------------------------------------------------
-# construit un voisin aleatoire realisable par swap (echange aleatoire)
+# Build randomly a feasible neighboor with a swap (random exchange)
+# Discussed in Chapter 2, course Metaheuristics
 
 function swap(s::solution)
   i0::Int64=-1;  i1::Int64=-1   #astuces
@@ -134,7 +135,8 @@ function swap(s::solution)
 end
 
 # ------------------------------------------------------------
-# construit un voisin aleatoire realisable par add_ou_drop (flip 01 ou 10 aleatoire)
+# Build randomly a feasible neighboor with an add_ou_drop (flip 0to1 or 1to0 randomly)
+# Discussed in Chapter 2, course Metaheuristics
 
 function addOrDrop(s::solution)
   i0::Int64=-1;  i1::Int64=-1   #astuces
@@ -171,8 +173,9 @@ function addOrDrop(s::solution)
 end
 
 # ------------------------------------------------------------
-# procede a l'exploration elementaire du voisinage d'une solution a partir d'un swap aleatoire
-# Appel :
+# Elementary exploration of a neighborhood of a solution with a random 
+# Discussed in Chapter 2, course Metaheuristics
+# Call :
 #          heuExplore(s0, zBest)
 #          @printf "\n\nzBest=%s \n" zBest
 
@@ -197,7 +200,8 @@ function heuExplore(s::solution, zBest)
 end
 
 # ------------------------------------------------------------
-# metaheuristique "Recuit simule" pour une fonction a maximiser
+# Simulated Annealing metaheuristic for a function to maximize
+# Discussed in Chapter 4, course Metaheuristics
 
 function metaSA(s0::solution, t0::Float64, lPalier::Int64, α::Float64, move, tLow::Float64, nogoodMax::Int64, verbose)
 
@@ -212,8 +216,8 @@ function metaSA(s0::solution, t0::Float64, lPalier::Int64, α::Float64, move, tL
 
   push!(zAll,s0.z) #faineantise : des structures globales pour les graphiques
   push!(zBest,s0.z)
-  push!(zMaxAll,s0.z) ; zMax = s0.z
-  push!(vtemp,t0)
+  push!(zBestAll,s0.z) ; zMax = s0.z
+  push!(tAll,t0)
 
   t = t0
   nogood = 0
@@ -265,8 +269,8 @@ function metaSA(s0::solution, t0::Float64, lPalier::Int64, α::Float64, move, tL
           @printf "R  \n"
         end
       end
-      push!(zMaxAll,zMax)
-      push!(vtemp,t)
+      push!(zBestAll,zMax)
+      push!(tAll,t)
       iter = iter +1
     end
 
@@ -280,9 +284,9 @@ function metaSA(s0::solution, t0::Float64, lPalier::Int64, α::Float64, move, tL
 end
 
 # ------------------------------------------------------------
-# Trace un graphique des resultats du SA (z pour toutes solutions, meilleures, glouton)
+# Plot a graph with the results obtained by the SA (z for all solutions, best, greedy)
 
-function traceSolutionsSA()
+function plotSolutionsSA()
 title("01UKP | n=" * dec(ukp.n)) # * " | α=" * dec(α) * " | lPalier=" * lPalier )
   xlabel("Algorithm's Iterations")
   ylabel("Function Value")
@@ -293,7 +297,7 @@ title("01UKP | n=" * dec(ukp.n)) # * " | α=" * dec(α) * " | lPalier=" * lPalie
   #plot(zBest, marker = "o")
 
   plot(zAll,label="all solutions")
-  plot(zMaxAll, linewidth=2.0, color="green", label="best solutions")
+  plot(zBestAll, linewidth=2.0, color="green", label="best solutions")
 
   vGreedy=fill(sGreedy.z,length(zAll))
   vRelax=fill(zRelax,length(zAll))
@@ -303,21 +307,21 @@ title("01UKP | n=" * dec(ukp.n)) # * " | α=" * dec(α) * " | lPalier=" * lPalie
 end
 
 # ------------------------------------------------------------
-# Trace la courbe de refroidissement du SA
+# Plot a graph of the cooling scheduled computed
 
-function traceTemperatureSA()
+function plotTemperatureSA()
   title("Cooling Schedule")
   xlabel("iterations")
   ylabel("temperature")
-  plot(vtemp)
+  plot(tAll)
 end
 
 # ------------------------------------------------------------
-# calcule et trace un schema de refroidissement a finalite d'etude
-# appel :
-#         examenRefroidissement(t0=100 , α=0.7,  lgPalier=6 , tLow = 1)
+# Compute and plot a cooling schedule for illustration purposes
+# call :
+#         coolingIllustration(t0=100 , α=0.7,  lgPalier=6 , tLow = 1)
 
-function examenRefroidissement(t0=100.0 , α=0.7,  lgPalier=6 , tLow = 1.0)
+function coolingIllustration(t0=100.0 , α=0.7,  lgPalier=6 , tLow = 1.0)
   # t0=100; alpha=0.9; lgPalier = 5 ; tLow = 1
 
   @printf "t0 = %d, lgPalier = %d, α=%f \n" t0 lgPalier α
@@ -350,6 +354,7 @@ end
 
 # ------------------------------------------------------------
 # Generate randomly an instance for the UKP with c and w unformly distributed
+
 function generateRandomlyInstanceUKP(n = 100, max_ci = 100, max_wi = 30)
 
     verboseUtility = false # rapporte (ou pas) les items par ordre decroissant
@@ -377,6 +382,8 @@ end
 
 # ------------------------------------------------------------
 # Descend method for computing a greedy solution for the UKP
+# Discussed in Chapter 2, course Metaheuristics
+
 function computeGreedySolutionUKP(ukp)
     
     # ---
@@ -403,6 +410,8 @@ end
 
 # ------------------------------------------------------------
 # Compute the linear relaxation for the 01UKP
+# Discussed in Chapter x, course Integer Programming
+
 function computeLinearRelaxationUKP(ukp)
     
     # identify the last item integrally selected
@@ -426,6 +435,8 @@ end
 
 # ------------------------------------------------------------
 # Compute randomly a feasible solution for the 01UKP
+# Discussed in Chapter 2, course Metaheuristics
+
 function computeRandomSolutionUKP(ukp)
     
     # ---
@@ -451,7 +462,7 @@ end
 
 
 # ============================================================
-# POINT d'ENTREE PRINCIPAL
+# MAIN ENTRY POINT
 # ============================================================
 
 # ------------------------------------------------------------
@@ -490,12 +501,12 @@ for run = 1:nbrRuns
   # ----------------------------------------------------------
   # Search a good solution with the simulated annealing
 
-  # move 1: pour flirter avec le glouton a sommeX variable
+  # move 1: improve a feasible solution by modifying the cardinality of variables equal to 1
   t0 = 300.0 ; lPalier = ceil(Int64, 1.5 * ukp.n) ; α = 0.95 ; tLow =0.5 ; nogoodMax = 5 * ukp.n
   @printf "t0 = %d, lPalier = %d, α=%f \n" t0 lPalier α
   sBest=metaSA(s0, t0, lPalier, α, addOrDrop, tLow, nogoodMax, verbose)
 
-  # move 2: pour creuser autour du glouton a sommeX fixe
+  # move 2: improve a feasible solution in maintaining the cardinality of variables equal to 1
   t0 = 50.0 ; lPalier = ceil(Int64, 2.5 * ukp.n) ; α = 0.8 ; tLow =0.05 ; nogoodMax = 10 * ukp.n
   @printf "t0 = %d, lPalier = %d, α=%f \n" t0 lPalier α
   sBest=metaSA(sBest, t0, lPalier, α, swap, tLow, nogoodMax, verbose)
@@ -509,12 +520,12 @@ end #nbrRuns
 
 #Pkg.add("PyPlot") # Mandatory before the first use of this package
 using PyPlot
-traceSolutionsSA()
-#traceTemperatureSA()
+plotSolutionsSA()
+#plotTemperatureSA()
 
 
 # Quantitative summary of results collected
-@printf "\n zS0=%d (%3d)  zMaxSA=%d (%3d)   zGreedy=%d (%3d)  zRelax=%7.2f" s0.z sum(s0.x)  pop!(zMaxAll) sum(sBest.x)  sGreedy.z sum(sGreedy.x)  zRelax
+@printf "\n zS0=%d (%3d)  zMaxSA=%d (%3d)   zGreedy=%d (%3d)  zRelax=%7.2f" s0.z sum(s0.x)  sBest.z sum(sBest.x)  sGreedy.z sum(sGreedy.x)  zRelax
 
 # ============================================================
 
