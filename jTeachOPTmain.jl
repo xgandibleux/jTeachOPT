@@ -79,13 +79,6 @@ type solution
 end
 
 # ------------------------------------------------------------
-# evaluate the objective function for a given solution
-
-function fctUKP(c,x)
-  return dot(c,x) # sum_{i=1}^{n} c_i x_i
-end
-
-# ------------------------------------------------------------
 # split of a solution into 2 index vectors V0 and V1 according respectively if x_i=0 or x_i=1
 
 function splitX(s::solution)
@@ -97,6 +90,13 @@ function splitX(s::solution)
       push!(s.v1,i)
     end
   end
+end
+
+# ------------------------------------------------------------
+# evaluate the objective function for a given solution
+
+function fctUKP(c,x)
+  return dot(c,x) # sum_{i=1}^{n} c_i x_i
 end
 
 # ------------------------------------------------------------
@@ -170,6 +170,114 @@ function addOrDrop(s::solution)
     @printf "addDrop) z=%d x=%s r=%d \n" sVoisin.z sVoisin.x sVoisin.r
   end
   return sVoisin
+end
+
+# ------------------------------------------------------------
+# Generate randomly an instance for the UKP with c and w unformly distributed
+
+function generateRandomlyInstanceUKP(n = 100, max_ci = 100, max_wi = 30)
+
+    verboseUtility = false # rapporte (ou pas) les items par ordre decroissant
+
+    # --- creation de l'instance
+    rnd_c = rand(1:max_ci,n); # c_i \in [1,max_ci]
+    rnd_w = rand(1:max_wi,n) # w_i \in [1,max_wi]
+    
+    # rank the items according the decreasing values u_i = c_i/w_i
+    utilite = rnd_c ./ rnd_w
+    reord = sortperm(utilite, rev=true)
+    ukp   = instance(n, zeros(n), zeros(n), 0)
+    for i = 1:n
+      ukp.c[i] = rnd_c[reord[i]]
+      ukp.w[i] = rnd_w[reord[i]]
+      if (verboseUtility == true)
+        @printf "(%d %d %.2f) \n " ukp.c[i] ukp.w[i] utilite[reord[i]]
+      end
+    end
+            
+    ukp.W = round(Int64, sum(ukp.w)/2)
+                
+    return ukp
+end
+
+# ------------------------------------------------------------
+# Descend method for computing a greedy solution for the UKP
+# Discussed in Chapter 2, course Metaheuristics
+
+function computeGreedySolutionUKP(ukp)
+    
+    # ---
+    # Calcule la solution gloutonne avec pour utilite : u(i) = c(i)/p(i)
+    sGreedy = solution(zeros(Int64, ukp.n), [], [], 0, 0, 0)
+    sommeW = 0
+    for i = 1:ukp.n
+      #@printf "%f\n" ukp.c[i]/ukp.w[i]
+      if (sommeW + ukp.w[i] <= ukp.W)
+        sGreedy.x[i] = 1
+        sommeW = sommeW + ukp.w[i]
+      end
+    end
+    sGreedy.z = fctUKP(ukp.c, sGreedy.x)
+    sGreedy.r = ukp.W - dot(ukp.w, sGreedy.x)
+    sGreedy.somX=sum(sGreedy.x) # somme des x_i = 1
+
+    # ---
+    # scinde le vecteur de x binaire en 2 vecteurs d'indices
+    splitX(sGreedy)
+                        
+    return sGreedy
+end
+
+# ------------------------------------------------------------
+# Compute the linear relaxation for the 01UKP
+# Discussed in Chapter x, course Integer Programming
+
+function computeLinearRelaxationUKP(ukp)
+    
+    # identify the last item integrally selected
+    sommeW = 0 ; s = 1
+    while (s <= ukp.n) && (sommeW + ukp.w[s] <= ukp.W)
+      sommeW = sommeW + ukp.w[s]
+      s = s + 1
+    end
+    s = s - 1
+                
+    # compute the upper bound
+    if (ukp.W - dot(ukp.w[1:s], sGreedy.x[1:s])) > 0
+      # contrainte non saturee => ajout de la partie fractionnaire de l'item bloquant
+      zRelax = sum(ukp.c[1:s]) + (ukp.W - dot(ukp.w[1:s], sGreedy.x[1:s])) * (ukp.c[s+1] ./ ukp.w[s+1])
+    else
+      # contrainte saturee => rien a faire
+      zRelax = sum(ukp.c[1:s])
+    end
+    return zRelax
+end
+
+# ------------------------------------------------------------
+# Compute randomly a feasible solution for the 01UKP
+# Discussed in Chapter 2, course Metaheuristics
+
+function computeRandomSolutionUKP(ukp)
+    
+    # ---
+    # Construit aleatoirement une solution initiale realisable
+    s0 = solution(zeros(Int64, ukp.n), [], [], 0, 0, 0)
+    semence = randperm(ukp.n) # une permutation aleatoire de (1..n)
+    sommeW = 0
+    for i = 1:ukp.n
+      if (sommeW + ukp.w[semence[i]] <= ukp.W)
+        s0.x[semence[i]] = 1
+        sommeW = sommeW + ukp.w[semence[i]]
+      end
+    end
+    s0.z = fctUKP(ukp.c,s0.x)
+    s0.r = ukp.W - dot(ukp.w,s0.x)
+
+    # ---
+    # scinde le vecteur de x binaire en 2 vecteurs d'indices
+    splitX(s0)
+
+    return s0
 end
 
 # ------------------------------------------------------------
@@ -350,114 +458,6 @@ function coolingIllustration(t0=100.0 , α=0.7,  lgPalier=6 , tLow = 1.0)
   for i = 1:length(ay)
     @printf "%4d %3d %6.2f \n" i ceil(Int64,i/lgPalier) ay[i]
   end
-end
-
-# ------------------------------------------------------------
-# Generate randomly an instance for the UKP with c and w unformly distributed
-
-function generateRandomlyInstanceUKP(n = 100, max_ci = 100, max_wi = 30)
-
-    verboseUtility = false # rapporte (ou pas) les items par ordre decroissant
-
-    # --- creation de l'instance
-    rnd_c = rand(1:max_ci,n); # c_i \in [1,max_ci]
-    rnd_w = rand(1:max_wi,n) # w_i \in [1,max_wi]
-    
-    # rank the items according the decreasing values u_i = c_i/w_i
-    utilite = rnd_c ./ rnd_w
-    reord = sortperm(utilite, rev=true)
-    ukp   = instance(n, zeros(n), zeros(n), 0)
-    for i = 1:n
-      ukp.c[i] = rnd_c[reord[i]]
-      ukp.w[i] = rnd_w[reord[i]]
-      if (verboseUtility == true)
-        @printf "(%d %d %.2f) \n " ukp.c[i] ukp.w[i] utilite[reord[i]]
-      end
-    end
-            
-    ukp.W = round(Int64, sum(ukp.w)/2)
-                
-    return ukp
-end
-
-# ------------------------------------------------------------
-# Descend method for computing a greedy solution for the UKP
-# Discussed in Chapter 2, course Metaheuristics
-
-function computeGreedySolutionUKP(ukp)
-    
-    # ---
-    # Calcule la solution gloutonne avec pour utilite : u(i) = c(i)/p(i)
-    sGreedy = solution(zeros(Int64, ukp.n), [], [], 0, 0, 0)
-    sommeW = 0
-    for i = 1:ukp.n
-      #@printf "%f\n" ukp.c[i]/ukp.w[i]
-      if (sommeW + ukp.w[i] <= ukp.W)
-        sGreedy.x[i] = 1
-        sommeW = sommeW + ukp.w[i]
-      end
-    end
-    sGreedy.z = fctUKP(ukp.c, sGreedy.x)
-    sGreedy.r = ukp.W - dot(ukp.w, sGreedy.x)
-    sGreedy.somX=sum(sGreedy.x) # somme des x_i = 1
-
-    # ---
-    # scinde le vecteur de x binaire en 2 vecteurs d'indices
-    splitX(sGreedy)
-                        
-    return sGreedy
-end
-
-# ------------------------------------------------------------
-# Compute the linear relaxation for the 01UKP
-# Discussed in Chapter x, course Integer Programming
-
-function computeLinearRelaxationUKP(ukp)
-    
-    # identify the last item integrally selected
-    sommeW = 0 ; s = 1
-    while (s <= ukp.n) && (sommeW + ukp.w[s] <= ukp.W)
-      sommeW = sommeW + ukp.w[s]
-      s = s + 1
-    end
-    s = s - 1
-                
-    # compute the upper bound
-    if (ukp.W - dot(ukp.w[1:s], sGreedy.x[1:s])) > 0
-      # contrainte non saturee => ajout de la partie fractionnaire de l'item bloquant
-      zRelax = sum(ukp.c[1:s]) + (ukp.W - dot(ukp.w[1:s], sGreedy.x[1:s])) * (ukp.c[s+1] ./ ukp.w[s+1])
-    else
-      # contrainte saturee => rien a faire
-      zRelax = sum(ukp.c[1:s])
-    end
-    return zRelax
-end
-
-# ------------------------------------------------------------
-# Compute randomly a feasible solution for the 01UKP
-# Discussed in Chapter 2, course Metaheuristics
-
-function computeRandomSolutionUKP(ukp)
-    
-    # ---
-    # Construit aleatoirement une solution initiale realisable
-    s0 = solution(zeros(Int64, ukp.n), [], [], 0, 0, 0)
-    semence = randperm(ukp.n) # une permutation aleatoire de (1..n)
-    sommeW = 0
-    for i = 1:ukp.n
-      if (sommeW + ukp.w[semence[i]] <= ukp.W)
-        s0.x[semence[i]] = 1
-        sommeW = sommeW + ukp.w[semence[i]]
-      end
-    end
-    s0.z = fctUKP(ukp.c,s0.x)
-    s0.r = ukp.W - dot(ukp.w,s0.x)
-
-    # ---
-    # scinde le vecteur de x binaire en 2 vecteurs d'indices
-    splitX(s0)
-
-    return s0
 end
 
 
