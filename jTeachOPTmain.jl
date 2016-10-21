@@ -243,7 +243,7 @@ function computeLinearRelaxationUKP(ukp)
     s = s - 1
                 
     # compute the upper bound
-    if (ukp.W - dot(ukp.w[1:s], sGreedy.x[1:s])) > 0
+    if ((ukp.W - dot(ukp.w[1:s], sGreedy.x[1:s])) > 0) && (s<ukp.n)
       # contrainte non saturee => ajout de la partie fractionnaire de l'item bloquant
       zRelax = sum(ukp.c[1:s]) + (ukp.W - dot(ukp.w[1:s], sGreedy.x[1:s])) * (ukp.c[s+1] ./ ukp.w[s+1])
     else
