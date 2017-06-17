@@ -15,6 +15,7 @@
 # La version implementee ne comporte pas
 # 1) de regle empechant le cyclage (regle de bland)
 # 2) de traitements garantissant une stabilite numerique
+
 # Les evolutions envisageables concernent
 # 1) la prise en compte de contraintes d'inegalites
 # 2) la phase 1 du simplexe pour trouver une solution initiale admissible
