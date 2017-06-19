@@ -1,10 +1,10 @@
 # ============================================================================
-# Version academique (minimaliste) de l'algorithme primal simplexe (phase 2)
+# Version scolaire (minimaliste) de l'algorithme primal simplexe (phase 2)
 #
 # Implementation revisee de
 #   Julia programming for Operations Research (Changhyun Kwon)
 #
-# X. Gandibleux, Juin 2017 -- validee sur Julia 0.5
+# X. Gandibleux, Juin 2017 -- validee sur Julia 0.5.2
 # ============================================================================
 
 # Le probleme doit etre donne
@@ -37,16 +37,16 @@
 #  export parametric_simplex_method
 
   # --------------------------------------------------------------------------
-  # type rassemblant toutes les donnees du tableau simplexe
+  # type rassemblant toutes les donnees du tableau simplexe (notations Teghem)
 
   type SimplexTableau
     I         ::Array{Int64}   # indices des variables de base
-    xB        ::Array{Float64} # activite des variables de base
-    a00_f1    ::Float64        # valeur de la fonction 1
-    a00_f2    ::Float64        # valeur de la fonction 2
+    xB        ::Array{Float64} # activite des variables de base (B-1 * d)
+    a00_f1    ::Float64        # valeur de la fonction 1 (CB1 * B-1 * d)
+    a00_f2    ::Float64        # valeur de la fonction 2 (CB2 * B-1 * d)
     alpha0_f1 ::Array{Float64} # Couts reduits fonction 1
     alpha0_f2 ::Array{Float64} # Couts reduits fonction 2
-    Y         ::Array{Float64} # Y = B-1 * T
+    Y         ::Array{Float64} # Matrice complete des contraintes (Y = B-1 * T)
   end
 
   # --------------------------------------------------------------------------
@@ -83,7 +83,7 @@
   end
 
   # --------------------------------------------------------------------------
-  # affichage ecran d'un tableau
+  # affichage ecran d'un tableau simplexe mono-objectif
 
   function print_tableau(t::SimplexTableau)
 
@@ -117,7 +117,7 @@
   end
 
   # --------------------------------------------------------------------------
-  # affichage ecran d'un tableau pour un probleme bi-objectif
+  # affichage ecran d'un tableau simplexe bi-objectif
 
   function print_tableau2(t::SimplexTableau)
 
@@ -157,7 +157,7 @@
   end
 
   # --------------------------------------------------------------------------
-  # pivotage
+  # pivotage mono-obj : echange entre variables (k,l), recalcul du tableau
 
   function pivoting!(t::SimplexTableau)
 
@@ -191,7 +191,7 @@
   end
 
   # --------------------------------------------------------------------------
-  # pivotage pour un probleme bi-objectif
+  # pivotage bi-obj : echange entre variables (k,l), recalcul du tableau
 
   function pivoting_biobj!(t::SimplexTableau)
 
@@ -321,7 +321,7 @@
   end
 
   # --------------------------------------------------------------------------
-  # test 1 : solution optimale si couts reduits sont negatifs
+  # test 1 : solution optimale mono-objectif si couts reduits alpha0_f1 sont negatifs
 
   function isOptimal(tableau)
 
@@ -330,7 +330,7 @@
   end
 
   # --------------------------------------------------------------------------
-  # test 1 : solution optimale si couts reduits sont negatifs pour un probleme bi-objectif
+  # test 1 : solution optimale bi-objectif si couts reduits alpha0_f2 sont negatifs
 
   function isOptimal_biobj(tableau)
 
