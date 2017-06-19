@@ -1,16 +1,16 @@
 include("simplex_XG.jl")
 using SimplexMethod
 
-include("simplexparam_XG.jl")
+include("simplexparam.jl")
 #using ParametricSimplexMethod
 
-# Example 1 
+# Example 1
 
 # min 3x1 +  x2
 # min -x1 - 2x2
 # s/c        x2 <= 3
 #     3x1 -  x2 <= 6
-#      x1 ,  x2 >= 0        
+#      x1 ,  x2 >= 0 
 
 # Data
 
