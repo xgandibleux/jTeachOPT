@@ -3,7 +3,7 @@ Implementation in Julia (compliant Julia v1.0.0) of well-known optimization algo
 
 ------
 
-Elements de soutien en Julia (v0.6.4 et antécédants) des exercices du cours "métaheuristiques" en master 1 informatique parcours "Optimisation en Recherche Opérationnelle (ORO)", année 2018-2019.
+Elements de soutien en Julia (v0.6.4 et antécédants) des exercices du cours "optimisation discrète et combinatoire" et "métaheuristiques" en master 1 informatique parcours "Optimisation en Recherche Opérationnelle (ORO)", année 2018-2019.
 
 ------
 
