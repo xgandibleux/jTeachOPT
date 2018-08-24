@@ -1,6 +1,7 @@
-# metaUKP
+# metaUKP: metaheuristics for the 0/1 unidimensional knapsack problem
 Implementation in Julia (compliant Julia v1.0.0) of well-known heuristics and metaheuristics applied on the 0/1 unidimensional knapsack problem (01UKP) for pedagogical purposes.
 
+------
 
 Algorithms/procedures implemented: 
   
