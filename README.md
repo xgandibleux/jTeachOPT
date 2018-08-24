@@ -3,6 +3,12 @@ Implementation in Julia (compliant Julia v1.0.0) of well-known heuristics and me
 
 ------
 
+Objectif:
+
+Elements de soutien en Julia (v0.6.4 et antécédants) des exercices du cours "métaheuristiques" en master 1 informatique parcours "Optimisation en Recherche Opérationnelle (ORO)", année 2018-2019.
+
+------
+
 Algorithms/procedures implemented: 
   
 -  Generator of instances for the 01UKP
