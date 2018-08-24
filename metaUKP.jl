@@ -1,7 +1,7 @@
 # ============================================================
-# metaUKP 
+# solveUKP 
 #
-#  Heuristics and metaheuristics applied on the 01UKP implemented in Julia (compliant v1.0.0)
+#  Bounds, heuristics and metaheuristics applied on the 01UKP implemented in Julia (compliant v1.0.0)
 #
 #  Xavier Gandibleux (Xavier.Gandibleux@univ-nantes.fr)
 #  Universite de Nantes, Faculty of sciences and technologies
@@ -25,23 +25,22 @@
 
 # Algorithms/procedures implemented :
 #
-#  Descend constructive method for the 01UKP
-#  Random feasible solution for the 01UKP
 #  Linear relaxation of the 01UKP
+#  Random feasible solution for the 01UKP
+#  Descend constructive method for the 01UKP
+#  Swap move for the 01UKP (swap)
+#  Add_or_drop move for the 01UKP (addOrDrop)
 #  Simple exploration heuristic (heuExplore)
 #  Simulated Annealing metaheuristic (metaSA)
-#  swap move for the 01UKP (swap)
-#  add_or_drop move for the 01UKP (addOrDrop)
 #  Computing and plotting of a cooling schedule (coolingIllustration)
 
 # ============================================================
 
 # Compulsory to be compliant with Julia v1.0.0:
 
+using Random
 using Printf
 using LinearAlgebra
-using Random
-
 
 # ------------------------------------------------------------
 # Global constants for reporting or not the activity of algorithms
