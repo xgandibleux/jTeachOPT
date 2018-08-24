@@ -10,9 +10,9 @@ Elements de soutien en Julia (v0.6.4 et antécédants) des exercices du cours "o
 Algorithms/procedures implemented: 
   
 -  Generator of instances for the 01UKP
--  Solution computed by descend constructive method for the 01UKP
--  Random feasible solution for the 01UKP
--  Upper bound computed by linear relaxation of the 01UKP
+-  Upper bound given by linear relaxation of the 01UKP
+-  Lower bound given by a random feasible solution for the 01UKP
+-  Lower bound given by a solution computed by descend constructive method for the 01UKP
 -  Simple exploration heuristic (heuExplore)
 -  Simulated Annealing metaheuristic (metaSA)
 -  swap move for the 01UKP (swap)
