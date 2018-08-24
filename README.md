@@ -7,7 +7,7 @@ Elements de soutien en Julia (v0.6.4 et antécédants) des exercices du cours "o
 
 ------
 
-Algorithms/procedures implemented: 
+Algorithms available: 
   
 -  Generator of instances for the 01UKP
 -  Upper bound given by linear relaxation of the 01UKP
