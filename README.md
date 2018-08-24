@@ -1,5 +1,5 @@
 # metaUKP
-Implementation in Julia of well-known optimization algorithms for pedagogical purposes
+Implementation in Julia (compliant Julia v1.0.0) of well-known optimization algorithms for pedagogical purposes
 
 
 Currently : 
