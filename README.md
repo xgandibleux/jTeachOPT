@@ -1,9 +1,9 @@
 # solveUKP: solving the 0/1 unidimensional knapsack problem
-Implementation in Julia (compliant Julia v1.0.0) of well-known optimization algorithms applied on the 0/1 unidimensional knapsack problem (01UKP) for pedagogical purposes.
+Implementation in Julia (compliant Julia v1.2) of well-known optimization algorithms applied on the 0/1 unidimensional knapsack problem (01UKP) for pedagogical purposes.
 
 ------
 
-Elements de soutien en Julia (v0.6.4 et antécédants) des exercices des cours "optimisation discrète et combinatoire" et "métaheuristiques" en master 1 informatique parcours "Optimisation en Recherche Opérationnelle (ORO)", année 2018-2019.
+Elements de soutien en Julia (v1.2 et suivants) des exercices des cours "optimisation discrète et combinatoire" et "métaheuristiques" en master 1 informatique parcours "Optimisation en Recherche Opérationnelle (ORO)", année 2019-2020.
 
 ------
 
