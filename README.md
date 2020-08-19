@@ -1,4 +1,4 @@
-# solveUKP: solving the 0/1 unidimensional knapsack problem
+# metaUKPstu: solving the 0/1 unidimensional knapsack problem
 Implementation in Julia (compliant Julia v1.2) of well-known optimization algorithms applied on the 0/1 unidimensional knapsack problem (01UKP) for pedagogical purposes.
 
 ------
